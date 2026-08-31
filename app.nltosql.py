@@ -1,4 +1,3 @@
-````python
 import streamlit as st
 from openai import OpenAI
 
@@ -64,21 +63,20 @@ if st.button("Generate SQL"):
 
     if user_question:
 
-        # Generate prompt
         prompt = generate_sql_query(user_question)
 
-        # Ask NVIDIA model
         response = client.chat.completions.create(
             model="poolside/laguna-xs-2.1",
             messages=[
-                {"role": "user", "content": prompt}
+                {
+                    "role": "user",
+                    "content": prompt
+                }
             ]
         )
 
-        # Get SQL
         sql_query = response.choices[0].message.content.strip()
 
-        # Remove markdown formatting
         sql_query = (
             sql_query
             .replace("```sql", "")
@@ -86,10 +84,8 @@ if st.button("Generate SQL"):
             .strip()
         )
 
-        # Display SQL
         st.subheader("Generated SQL")
         st.code(sql_query, language="sql")
 
     else:
         st.warning("Please enter a question.")
-````
