@@ -7,7 +7,11 @@ client = OpenAI(
     api_key=st.secrets["NVIDIA_API_KEY"]
 )
 
+
+# --------------------------------
 # Generate SQL prompt
+# --------------------------------
+
 def generate_sql_query(user_question):
 
     prompt = f"""
@@ -24,6 +28,8 @@ Convert the user's question into a MySQL query.
 Important:
 - Return ONLY the SQL query.
 - Do not explain the query.
+- Do not show your thinking.
+- Do not use <think> or </think>.
 - Do not use markdown.
 - Do not use ```sql or ```.
 
@@ -34,7 +40,10 @@ User question:
     return prompt
 
 
+# --------------------------------
 # Streamlit UI
+# --------------------------------
+
 st.title("🤖 Natural Language to SQL Agent")
 
 st.write(
@@ -44,10 +53,14 @@ st.write(
 user_question = st.text_input("Enter your question:")
 
 
+# --------------------------------
 # Generate SQL
+# --------------------------------
+
 if st.button("Generate SQL"):
 
     if not user_question:
+
         st.warning("Please enter a question.")
 
     else:
@@ -66,19 +79,35 @@ if st.button("Generate SQL"):
                 ]
             )
 
-            sql_query = response.choices[0].message.content.strip()
+            # Get generated response
+            sql_query = response.choices[0].message.content
 
+            # Remove thinking tags and markdown
             sql_query = (
                 sql_query
+                .replace("<think>", "")
+                .replace("</think>", "")
                 .replace("```sql", "")
                 .replace("```", "")
                 .strip()
             )
 
+            # If the model repeats the same SQL twice,
+            # keep only the first occurrence
+            sql_parts = sql_query.split(";")
+
+            if len(sql_parts) > 2:
+                first_query = sql_parts[0].strip()
+
+                if first_query:
+                    sql_query = first_query + ";"
+
+            # Display SQL
             st.subheader("Generated SQL")
             st.code(sql_query, language="sql")
 
         except Exception:
+
             st.error(
                 "The AI service is temporarily unavailable. "
                 "Please try again later."
