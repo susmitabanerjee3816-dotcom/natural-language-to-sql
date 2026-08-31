@@ -1,22 +1,15 @@
+````python
 import streamlit as st
 from openai import OpenAI
-import mysql.connector
-from dotenv import load_dotenv
-import os
 
-# Load environment variables
-load_dotenv(override=True)
-print("API KEY LOADED:", bool(os.getenv("NVIDIA_API_KEY")))
+# --------------------------------
+# NVIDIA API
+# --------------------------------
 
-# Get Gemini API key
-API_KEY = st.secrets["NVIDIA_API_KEY"]
-
-# Create Gemini client
 client = OpenAI(
-  base_url = "https://integrate.api.nvidia.com/v1",
-  api_key = st.secrets["NVIDIA_API_KEY"]
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=st.secrets["NVIDIA_API_KEY"]
 )
-
 
 # --------------------------------
 # Generate SQL prompt
@@ -49,26 +42,6 @@ User question:
 
 
 # --------------------------------
-# Connect to MySQL
-# --------------------------------
-
-def connect_to_sql():
-    print("CONNECT FUNCTION RUNNING")
-    
-
-    conn = mysql.connector.connect(
-        host=os.getenv("MYSQL_HOST"),
-        port=int(os.getenv("MYSQL_PORT")),
-        user=os.getenv("MYSQL_USER"),
-        password=os.getenv("MYSQL_PASSWORD"),
-        database=os.getenv("MYSQL_DATABASE")
-    )
-
-    print("MYSQL CONNECTED")
-    return conn
-
-
-# --------------------------------
 # Streamlit UI
 # --------------------------------
 
@@ -84,7 +57,7 @@ user_question = st.text_input(
 
 
 # --------------------------------
-# Generate SQL and execute
+# Generate SQL
 # --------------------------------
 
 if st.button("Generate SQL"):
@@ -94,13 +67,13 @@ if st.button("Generate SQL"):
         # Generate prompt
         prompt = generate_sql_query(user_question)
 
-        # Ask Gemini
+        # Ask NVIDIA model
         response = client.chat.completions.create(
-    model="poolside/laguna-xs-2.1",
-    messages=[
-        {"role": "user", "content": prompt}
-    ]
-)
+            model="poolside/laguna-xs-2.1",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
 
         # Get SQL
         sql_query = response.choices[0].message.content.strip()
@@ -117,26 +90,6 @@ if st.button("Generate SQL"):
         st.subheader("Generated SQL")
         st.code(sql_query, language="sql")
 
-        # Connect to MySQL
-        conn = connect_to_sql()
-        cursor = conn.cursor()
-
-        # Execute SQL
-        cursor.execute(sql_query)
-
-        # Get results
-        results = cursor.fetchall()
-
-        # Display results
-        st.subheader("Results")
-
-        for row in results:
-            st.write(row)
-
-        # Close connection
-        cursor.close()
-        conn.close()
-
     else:
-
         st.warning("Please enter a question.")
+````
