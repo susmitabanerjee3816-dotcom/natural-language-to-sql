@@ -66,14 +66,18 @@ if st.button("Generate SQL"):
         prompt = generate_sql_query(user_question)
 
         response = client.chat.completions.create(
-            model="poolside/laguna-xs-2.1",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
+        model="poolside/laguna-xs-2.1",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+except Exception as e:
+    st.error("The AI service is temporarily unavailable. Please try again.")
+    st.stop()
 
         sql_query = response.choices[0].message.content.strip()
 
