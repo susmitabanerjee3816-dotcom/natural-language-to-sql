@@ -9,12 +9,12 @@ load_dotenv(override=True)
 print("API KEY LOADED:", bool(os.getenv("NVIDIA_API_KEY")))
 
 # Get Gemini API key
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+API_KEY = st.secrets("NVIDIA_API_KEY")
 
 # Create Gemini client
 client = OpenAI(
   base_url = "https://integrate.api.nvidia.com/v1",
-  api_key = "NVIDIA_API_KEY"
+  api_key = st.secrets["NVIDIA_API_KEY"]
 )
 
 
